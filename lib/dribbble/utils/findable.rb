@@ -4,6 +4,7 @@ module Dribbble
       module ClassMethods
         def find(token, id)
           @token = token
+          binding.pry
           new token, html_get("/#{pluralized_class_name}/#{id}")
         end
       end

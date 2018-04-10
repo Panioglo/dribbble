@@ -1,9 +1,7 @@
 require 'dribbble/base'
 require 'dribbble/shot'
 require 'dribbble/user'
-require 'dribbble/bucket'
 require 'dribbble/project'
-require 'dribbble/team'
 require 'dribbble/errors'
 
 require 'rest_client'
@@ -19,16 +17,6 @@ module Dribbble
       fail Dribbble::Error::MissingToken if @token.nil?
     end
 
-    # Get authenticated user's buckets
-    def buckets(attrs = {})
-      Dribbble::Bucket.batch_new token, html_get('/user/buckets', attrs)
-    end
-
-    # Get authenticated user's followers
-    def followers(attrs = {})
-      Dribbble::User.batch_new token, html_get('/user/followers', attrs)
-    end
-
     # Get authenticated user's likes
     def likes(attrs = {})
       Dribbble::Shot.batch_new token, html_get('/user/likes', attrs), 'shot'
@@ -39,25 +27,20 @@ module Dribbble
       Dribbble::Project.batch_new token, html_get('/user/projects', attrs)
     end
 
-    # Get authenticated user's shots
+    # Get authenticated user's popular shots
+    def popular_shots(attrs = {})
+      Dribbble::Shot.batch_new token, html_get('/user/popular_shots', attrs)
+    end
+
     def shots(attrs = {})
       Dribbble::Shot.batch_new token, html_get('/user/shots', attrs)
     end
 
-    # Get authenticated user's followees shots
-    # Limited to first 600 shots regardless of the pagination
-    def following_shots(attrs = {})
-      Dribbble::Shot.batch_new token, html_get('/user/following/shots', attrs)
-    end
-
-    # Get authenticated user's teams
-    def teams(attrs = {})
-      Dribbble::Team.batch_new token, html_get('/user/teams', attrs)
-    end
-
     # Get a single User or the authenticated one
-    def user
-      Dribbble::User.new @token, html_get('/user')
+    def user(oauth_token=nil)
+      url = '/user'
+      url += "?access_token=#{oauth_token}" unless oauth_token.nil?
+      Dribbble::User.new @token, html_get(url)
     end
   end
 end

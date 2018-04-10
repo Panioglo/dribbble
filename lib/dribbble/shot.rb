@@ -3,8 +3,6 @@ require 'dribbble/utils/creatable'
 require 'dribbble/utils/updatable'
 require 'dribbble/utils/deletable'
 require 'dribbble/attachment'
-require 'dribbble/comment'
-require 'dribbble/like'
 
 module Dribbble
   class Shot < Dribbble::Base
@@ -13,7 +11,7 @@ module Dribbble
     include Dribbble::Utils::Updatable
     include Dribbble::Utils::Deletable
 
-    has_many :attachments, :buckets, :comments, :likes, :projects
+    has_many :attachments, :buckets, :likes, :projects
     has_many :rebounds, as: Dribbble::Shot
 
     def self.available_fields
@@ -24,25 +22,12 @@ module Dribbble
       res.code == 202 ? res.headers[:location].split('/').last : false
     end
 
-    def like?
-      html_get "/shots/#{id}/like"
-      true
-    rescue RestClient::ResourceNotFound
-      false
+    def create_attachments
+      html_post "/shots/#{id}/attachments"
     end
 
-    def like!
-      res = html_post "/shots/#{id}/like"
-      res.code == 201 ? true : false
-    end
-
-    def unlike!
-      res = html_delete "/shots/#{id}/like"
-      res.code == 204 ? true : false
-    end
-
-    def rebounds(attrs = {})
-      Dribbble::Shot.batch_new token, html_get("/shots/#{id}/rebounds", attrs)
+    def delete_attachment(attachment_id)
+      html_delete "/shots/#{id}/attachments/#{attachment_id}"
     end
   end
 end
